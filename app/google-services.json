@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "155689471270",
+    "project_id": "spiritguide-18151",
+    "storage_bucket": "spiritguide-18151.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:155689471270:android:f8f652245c3a01d4a4c5e7",
+        "android_client_info": {
+          "package_name": "com.example.spiritguide"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwjaqxhXpP-Swe0A3V0VBniE7XOb-bApE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
