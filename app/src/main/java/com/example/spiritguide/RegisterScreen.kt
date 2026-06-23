@@ -18,7 +18,7 @@ fun RegisterScreen(onNavigateBackToLogin: () -> Unit) {
 
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
-    
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
