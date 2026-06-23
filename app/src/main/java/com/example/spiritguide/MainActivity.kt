@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,13 +58,8 @@ fun AppNavigation() {
             )
         }
         composable("home") {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
-                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
-            ) {
-                androidx.compose.material3.Text("Aici va fi lista cu cocktail-uri!")
-            }
+            val cocktailViewModel: com.example.spiritguide.viewmodel.CocktailViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+            HomeScreen(viewModel = cocktailViewModel)
         }
     }
 }
