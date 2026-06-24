@@ -145,6 +145,21 @@ fun CocktailItem(cocktail: Cocktail, onFetchDetails: () -> Unit) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 if (cocktail.instructions != null) {
+                    val ingredients = cocktail.getIngredientsList()
+                    if (ingredients.isNotEmpty()) {
+                        Text(
+                            text = "Ingrediente:",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        ingredients.forEach { ingredient ->
+                            Text(
+                                text = "• $ingredient",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
                     Text(
                         text = "Instrucțiuni:\n${cocktail.instructions}",
                         style = MaterialTheme.typography.bodyMedium,
