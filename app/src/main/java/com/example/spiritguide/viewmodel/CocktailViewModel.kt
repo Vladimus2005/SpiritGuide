@@ -4,12 +4,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.spiritguide.db.CocktailDao
 import com.example.spiritguide.model.Cocktail
 import com.example.spiritguide.network.RetrofitInstance
 import kotlinx.coroutines.launch
 
-class CocktailViewModel : ViewModel(){
+class CocktailViewModel(private val dao: CocktailDao) : ViewModel(){
     var cocktails by mutableStateOf<List<Cocktail>>(emptyList())
         private set
 
@@ -20,6 +22,11 @@ class CocktailViewModel : ViewModel(){
         private set
 
     init {
+        viewModelScope.launch {
+            dao.getAllCocktails().collect { localCocktails ->
+                cocktails = localCocktails
+            }
+        }
         fetchCocktails()
     }
 
@@ -29,12 +36,24 @@ class CocktailViewModel : ViewModel(){
             errorMessage = null
             try {
                 val response = RetrofitInstance.api.getAlcoholicCocktails()
-                cocktails = response.drinks ?: emptyList()
+                response.drinks?.let { dao.insertCocktails(it) }
             } catch (e: Exception) {
-                errorMessage = "Nu s-au putut încărca datele. Verifică conexiunea la internet!"
+                if (cocktails.isEmpty()) {
+                    errorMessage = "Nu s-au putut încărca datele. Verifică conexiunea la internet!"
+                }
             } finally {
                 isLoading = false
             }
         }
+    }
+}
+
+class CocktailViewModelFactory(private val dao: CocktailDao) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(CocktailViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return CocktailViewModel(dao) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

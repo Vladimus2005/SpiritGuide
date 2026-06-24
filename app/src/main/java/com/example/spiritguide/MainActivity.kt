@@ -19,6 +19,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.spiritguide.db.AppDatabase
+import com.example.spiritguide.viewmodel.CocktailViewModel
+import com.example.spiritguide.viewmodel.CocktailViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,7 +63,11 @@ fun AppNavigation() {
             )
         }
         composable("home") {
-            val cocktailViewModel: com.example.spiritguide.viewmodel.CocktailViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+            val context = LocalContext.current
+            val database = androidx.compose.runtime.remember { AppDatabase.getDatabase(context) }
+            val cocktailViewModel: CocktailViewModel = viewModel(
+                factory = CocktailViewModelFactory(database.cocktailDao())
+            )
             HomeScreen(viewModel = cocktailViewModel)
         }
     }
