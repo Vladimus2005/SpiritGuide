@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CocktailDao {
-    @Query("SELECT * FROM cocktails")
+    @Query("SELECT * FROM cocktails ORDER BY name ASC")
     fun getAllCocktails(): Flow<List<Cocktail>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
