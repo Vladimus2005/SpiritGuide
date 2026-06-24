@@ -46,6 +46,21 @@ class CocktailViewModel(private val dao: CocktailDao) : ViewModel(){
             }
         }
     }
+    fun loadCocktailDetails(cocktail: Cocktail) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.api.getCocktailDetails(cocktail.id)
+                response.drinks?.let { detailedCocktails ->
+                    dao.insertCocktails(detailedCocktails)
+                }
+            } catch (e: Exception) {
+                val errorCocktail = cocktail.copy(
+                    instructions = "Eroare: Nu s-a putut descărca rețeta. Verifică conexiunea la internet!"
+                )
+                dao.insertCocktails(listOf(errorCocktail))
+            }
+        }
+    }
 }
 
 class CocktailViewModelFactory(private val dao: CocktailDao) : ViewModelProvider.Factory {

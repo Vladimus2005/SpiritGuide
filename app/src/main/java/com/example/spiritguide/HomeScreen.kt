@@ -1,5 +1,6 @@
 package com.example.spiritguide
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -21,6 +23,7 @@ import com.example.spiritguide.model.Cocktail
 import com.example.spiritguide.viewmodel.CocktailViewModel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.setValue
 
 @Composable
 fun HomeScreen(viewModel: CocktailViewModel) {
@@ -83,8 +86,11 @@ fun HomeScreen(viewModel: CocktailViewModel) {
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(viewModel.cocktails) { cocktail ->
-                        CocktailItem(cocktail = cocktail)
+                    items(items = viewModel.cocktails, key = { cocktail -> cocktail.id}) { cocktail ->
+                        CocktailItem(
+                            cocktail = cocktail,
+                            onFetchDetails = { viewModel.loadCocktailDetails(cocktail)}
+                            )
                     }
                 }
             }
@@ -93,32 +99,63 @@ fun HomeScreen(viewModel: CocktailViewModel) {
 }
 
 @Composable
-fun CocktailItem(cocktail: Cocktail) {
+fun CocktailItem(cocktail: Cocktail, onFetchDetails: () -> Unit) {
+    var isExpanded by remember { mutableStateOf(false) }
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                isExpanded = !isExpanded
+                if (isExpanded && cocktail.instructions == null) {
+                    onFetchDetails()
+                }
+            },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            AsyncImage(
-                model = cocktail.imageUrl,
-                contentDescription = cocktail.name,
+            Row(
                 modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AsyncImage(
+                    model = cocktail.imageUrl,
+                    contentDescription = cocktail.name,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
 
-            Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(16.dp))
 
-            Text(
-                text = cocktail.name,
-                style = MaterialTheme.typography.titleMedium
-            )
+                Text(
+                    text = cocktail.name,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+            if (isExpanded) {
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (cocktail.instructions != null) {
+                    Text(
+                        text = "Instrucțiuni:\n${cocktail.instructions}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    }
+                }
+            }
         }
     }
 }
