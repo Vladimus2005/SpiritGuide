@@ -24,14 +24,41 @@ import com.example.spiritguide.viewmodel.CocktailViewModel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.setValue
+import androidx.compose.material3.TextButton
 
 @Composable
-fun HomeScreen(viewModel: CocktailViewModel) {
+fun HomeScreen(viewModel: CocktailViewModel, onLogout: () -> Unit) {
     val context = LocalContext.current
     val userPreferences = remember { UserPreferences(context) }
     val coroutineScope = rememberCoroutineScope()
 
     val isDisclaimerHidden by userPreferences.hideDisclaimerFlow.collectAsState(initial = true)
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text(text = "Deconectare") },
+            text = { Text(text = "Ești sigur că vrei să te deconectezi?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showLogoutDialog = false
+                        onLogout()
+                    }
+                ) {
+                    Text("Da", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showLogoutDialog = false }
+                ) {
+                    Text("Nu")
+                }
+            }
+        )
+    }
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -41,11 +68,27 @@ fun HomeScreen(viewModel: CocktailViewModel) {
                 .fillMaxSize()
                 .systemBarsPadding()
         ) {
-            Text(
-                text = "Cocktail-uri",
-                style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, top = 16.dp, end = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Cocktail-uri",
+                    style = MaterialTheme.typography.headlineLarge
                 )
+
+                TextButton(onClick = { showLogoutDialog = true }) {
+                    Text(
+                        text = "Deconectare",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
         if (!isDisclaimerHidden) {
             Card(
                 modifier = Modifier
@@ -72,15 +115,7 @@ fun HomeScreen(viewModel: CocktailViewModel) {
                 }
             }
         }
-            if (viewModel.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else if (viewModel.errorMessage != null) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = viewModel.errorMessage!!, color = MaterialTheme.colorScheme.error)
-                }
-            } else {
+            if (viewModel.cocktails.isNotEmpty()) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
@@ -90,8 +125,16 @@ fun HomeScreen(viewModel: CocktailViewModel) {
                         CocktailItem(
                             cocktail = cocktail,
                             onFetchDetails = { viewModel.loadCocktailDetails(cocktail)}
-                            )
+                        )
                     }
+                }
+            } else if (viewModel.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else if (viewModel.errorMessage != null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = viewModel.errorMessage!!, color = MaterialTheme.colorScheme.error)
                 }
             }
         }

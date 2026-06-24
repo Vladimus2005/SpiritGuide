@@ -10,6 +10,7 @@ import com.example.spiritguide.db.CocktailDao
 import com.example.spiritguide.model.Cocktail
 import com.example.spiritguide.network.RetrofitInstance
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 class CocktailViewModel(private val dao: CocktailDao) : ViewModel(){
     var cocktails by mutableStateOf<List<Cocktail>>(emptyList())
@@ -25,6 +26,9 @@ class CocktailViewModel(private val dao: CocktailDao) : ViewModel(){
         viewModelScope.launch {
             dao.getAllCocktails().collect { localCocktails ->
                 cocktails = localCocktails
+                if (localCocktails.isNotEmpty()) {
+                    errorMessage = null
+                }
             }
         }
         fetchCocktails()
@@ -38,6 +42,8 @@ class CocktailViewModel(private val dao: CocktailDao) : ViewModel(){
                 val response = RetrofitInstance.api.getAlcoholicCocktails()
                 response.drinks?.let { dao.insertCocktails(it) }
             } catch (e: Exception) {
+                delay(500)
+
                 if (cocktails.isEmpty()) {
                     errorMessage = "Nu s-au putut încărca datele. Verifică conexiunea la internet!"
                 }
